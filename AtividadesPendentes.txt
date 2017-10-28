@@ -1,0 +1,11 @@
+Tarefas ordenadas por prioridade. 
+Ao assumir uma tarefa, por o nome do lado da tarefa assumida.
+
+* Interface Grafica: Visualização do Grafo; - Sarah
+* Algoritmos para árvore geradora mínima: Prim;
+* Algoritmos para árvore geradora mínima: Kruskal;
+* Fórmula para verificação de planaridade;
+* Verificar também presença de ciclos de tamanho 3;
+* Sem destino para o DFS e BFS;
+* Estrutura de Matriz de Adjacência;
+
