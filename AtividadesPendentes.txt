@@ -1,9 +1,9 @@
 Tarefas ordenadas por prioridade. 
 Ao assumir uma tarefa, por o nome do lado da tarefa assumida.
 
-* Interface Grafica: Visualização do Grafo; - Sarah <- procurando uma virgem pra fazer funcionar, botando em stand by
-* Algoritmos para árvore geradora mínima: Prim - Ivo;
-* Algoritmos para árvore geradora mínima: Kruskal; - Sarah
+* Interface Grafica: Visualização do Grafo; - Sarah
+* Algoritmos para árvore geradora mínima: Prim - funcionando;
+* Algoritmos para árvore geradora mínima: Kruskal;
 * Fórmula para verificação de planaridade - funcionando;
 * Verificar também presença de ciclos de tamanho 3 - funcionando;
 * Sem destino para o DFS e BFS;
