@@ -702,12 +702,10 @@ void prim(Grafo &grafo){
                 for(int k = 0; k < countS_V; k++){
                     if(Arcos->dado.destino == S_Vertices[k]){
                         tmp = retornaValorAresta(vertice, Arcos->dado.destino);
-                        cout << tmp << " " << S_Vertices[k] << " " << Q[i] << "\n";
                         if(tmp > 0 && tmp < menor_valor){
                             menor_valor = tmp;
                             menor_destino = Q[i];
                             menor_origem = S_Vertices[k];
-                            cout << tmp << " " << menor_origem << "-" << menor_destino;
                         }
                     }
                 }
@@ -720,30 +718,53 @@ void prim(Grafo &grafo){
         countS_V++;
         if(removeDeQ(Q, menor_destino, countQ))
             countQ--;
-
-        ///area de testes
-        cout << "S: ";
-        for(int i = 0; i < countS; i++){
-            cout << S[i] << ", ";
-        }
-        cout << "\nQ: ";
-        for(int i = 0; i < countQ; i++){
-            cout << Q[i] << ", ";
-        }
-        cout << "\nS_V: ";
-        for(int i = 0; i < countS_V; i++){
-            cout << S_Vertices[i] << ", ";
-        }
-        system("pause");
-        system("cls");
-        ///area de testes
     }
     for(int i = 0; i < countS; i++){
-        cout << S[i] << ", ";
+        cout << S[i];
+        if(i < countS-1)
+            cout << ", ";
     }
     cout << "\n";
     system("pause");
     menu(grafo);
+}
+
+void criaMatrizDesenho(Grafo g){
+    string m[g.vertices.qtd][g.vertices.qtd];
+
+    for (int i=0; i<g.vertices.qtd; i++){
+        for (int j=0; j<g.vertices.qtd; j++){
+            m[i][j] = '0';
+        }
+    }
+
+    for (int i=0; i<g.vertices.qtd; i++){
+        for (int j=0; j<g.vertices.qtd; j++){
+            cout << m[i][j] << "\t";
+        } cout << "\n";
+    } cout << "\n";
+
+    TElementoVertice *vet = g.vertices.inicio;
+    for (int i=0; i<g.vertices.qtd; i++){
+        for (int j=0; j<g.vertices.qtd; j++){
+            if(i%2 == 0){
+                if (j==0 || j == g.vertices.qtd-1){
+                    if (vet != NULL){
+                        m[i][j] = vet->dado.nome;
+                        vet = vet->prox;
+                    }
+                }
+            }
+        }
+    }
+
+
+    for (int i=0; i<g.vertices.qtd; i++){
+        for (int j=0; j<g.vertices.qtd; j++){
+            cout << m[i][j] << "\t";
+        } cout << "\n";
+    }
+
 }
 
 void menu (Grafo &grafo){
