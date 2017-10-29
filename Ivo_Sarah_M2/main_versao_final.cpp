@@ -57,6 +57,7 @@ struct Grafo{
     bool isPonderado;
     bool isOrientado;
     TListaVertice vertices;
+    int Arestas;
 };
 
 void menu(Grafo &grafo);
@@ -560,7 +561,7 @@ void ordenaParaColorir(TListaVertice &l){ ///Welsh e Powell
 void colore(Grafo &grafo, string vertice){
     TElementoVertice *nav = retornaVertice(grafo, vertice);
     string listaCores[5] = {"null", "null", "null", "null", "null"};
-    string listaCoresPadrao[5] = {"vermelho", "verde", "azul", "amarelo", "magenta"};
+    string listaCoresPadrao[5] = {"vermelho", "verde", "azul", "amarelo", "laranja"};
     TElementoArco *navnav;
     TElementoVertice *temp;
     TElementoVertice *navAux = grafo.vertices.inicio;
@@ -620,6 +621,128 @@ void colore(Grafo &grafo, string vertice){
     }
 }
 
+bool TemCicloTres(Grafo &grafo){
+    TElementoVertice *NavegadorPrincipal = grafo.vertices.inicio;
+    TElementoArco *ArcosPrincipal;
+    TElementoVertice *Navegador2;
+    TElementoArco *Arcos2;
+    TElementoVertice *Navegador3;
+    TElementoArco *Arcos3;
+
+    for(int i = 0; i < grafo.vertices.qtd; i++){
+        ArcosPrincipal = NavegadorPrincipal->dado.arcos.inicio;
+        for(int j = 0; j < NavegadorPrincipal->dado.arcos.qtd; j++){
+            Navegador2 = retornaVertice(grafo, ArcosPrincipal->dado.destino);
+            Arcos2 = Navegador2->dado.arcos.inicio;
+            for(int k = 0; k < Navegador2->dado.arcos.qtd; k++){
+                Navegador3 = retornaVertice(grafo, Arcos2->dado.destino);
+                Arcos3 = Navegador3->dado.arcos.inicio;
+                for(int l = 0; l < Navegador3->dado.arcos.qtd; l++){
+                    if(Arcos3->dado.destino == NavegadorPrincipal->dado.nome)
+                        return true;
+                    Arcos3 = Arcos3->prox;
+                }
+                Arcos2 = Arcos2->prox;
+            }
+            ArcosPrincipal = ArcosPrincipal->prox;
+        }
+        NavegadorPrincipal = NavegadorPrincipal->prox;
+    }
+
+    return false;
+}
+
+void preenche_Q(Grafo &grafo, string *Q){
+    TElementoVertice *nav = grafo.vertices.inicio;
+    for(int i = 0; i < grafo.vertices.qtd; i++){
+        Q[i] = nav->dado.nome;
+        nav = nav->prox;
+    }
+}
+
+int retornaValorAresta(TElementoVertice *vertice, string destino){
+    TElementoArco *Arco = vertice->dado.arcos.inicio;
+    for(int i = 0; i < vertice->dado.arcos.qtd; i++){
+        if(Arco->dado.destino == destino)
+            return Arco->dado.valor;
+    }
+    return 0;
+}
+
+bool removeDeQ(string *Q, string dado, int qtd){
+    for (int i = 0; i < qtd; i++){
+        if (Q[i] == dado){
+            for(int j = i; j < qtd-1; j++){
+                Q[j] = Q[j+1];
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void prim(Grafo &grafo){
+    string S[grafo.vertices.qtd], S_Vertices[grafo.vertices.qtd], Q[grafo.vertices.qtd], vertice_inicial, menor_origem, menor_destino;
+    int countS = 0, countS_V = 0, countQ = grafo.vertices.qtd, menor_valor, tmp;
+    TElementoVertice *vertice;
+    TElementoArco *Arcos;
+    preenche_Q(grafo, Q);
+    vertice_inicial = Q[0];
+    if(removeDeQ(Q, vertice_inicial, countQ))
+        countQ--;
+    S_Vertices[countS_V] = vertice_inicial;
+    countS_V++;
+    while(countQ > 0){
+        menor_valor = INFINITO;
+        for(int i = 0; i < countQ; i++){
+            vertice = retornaVertice(grafo, Q[i]);
+            Arcos = vertice->dado.arcos.inicio;
+            for(int j = 0; j < vertice->dado.arcos.qtd; j++){
+                for(int k = 0; k < countS_V; k++){
+                    if(Arcos->dado.destino == S_Vertices[k]){
+                        tmp = retornaValorAresta(vertice, Arcos->dado.destino);
+                        if(tmp > 0 && tmp < menor_valor){
+                            menor_valor = tmp;
+                            menor_destino = Q[i];
+                            menor_origem = S_Vertices[k];
+                        }
+                    }
+                }
+                Arcos = Arcos->prox;
+            }
+        }
+        S[countS] = menor_origem + menor_destino;
+        countS++;
+        S_Vertices[countS_V] = menor_destino;
+        countS_V++;
+        if(removeDeQ(Q, menor_destino, countQ))
+            countQ--;
+
+        ///area de testes
+        cout << "S: ";
+        for(int i = 0; i < countS; i++){
+            cout << S[i] << ", ";
+        }
+        cout << "\nQ: ";
+        for(int i = 0; i < countQ; i++){
+            cout << Q[i] << ", ";
+        }
+        cout << "\nS_V: ";
+        for(int i = 0; i < countS_V; i++){
+            cout << S_Vertices[i] << ", ";
+        }
+        system("pause");
+        system("cls");
+        ///area de testes
+    }
+    for(int i = 0; i < countS; i++){
+        cout << S[i] << ", ";
+    }
+    cout << "\n";
+    system("pause");
+    menu(grafo);
+}
+
 void menu (Grafo &grafo){
     string origem, destino;
     int opcao = 0, valor;
@@ -630,22 +753,24 @@ void menu (Grafo &grafo){
 
     system("cls");
 
-    cout << "1. Insere Vértice\n"
-         << "2. Remover Vértice\n";
+    cout << "1.\tInsere Vértice\n"
+         << "2.\tRemover Vértice\n";
     if (!grafo.isOrientado){
-        cout << "3. Inserir Aresta\n"
-             << "4. Remover Aresta\n";
+        cout << "3.\tInserir Aresta\n"
+             << "4.\tRemover Aresta\n";
     }
     else{
-        cout << "3. Inserir Arco\n"
-             << "4. Remover Arco\n";
+        cout << "3.\tInserir Arco\n"
+             << "4.\tRemover Arco\n";
     }
-    cout << "5. Retornar Vértice\n"
-         << "6. Existe Aresta\n"
-         << "7. Retornar Arestas\n"
-         << "8. Imprimir Grafo\n"
-         << "9. Dijkstra\n"
-         << "0. Sair\n";
+    cout << "5.\tRetornar Vértice\n"
+         << "6.\tExiste Aresta\n"
+         << "7.\tRetornar Arestas\n"
+         << "8.\tImprimir Grafo\n"
+         << "9.\tDijkstra\n"
+         << "10.\tPlanaridade\n"
+         << "11.\tPrim\n"
+         << "0.\tSair\n";
     cin >> opcao;
     cin.ignore();
     system("cls");
@@ -673,6 +798,7 @@ void menu (Grafo &grafo){
             if (!grafo.isOrientado)
                 insereAresta(grafo, destino, origem, valor);
             insereAresta(grafo, origem, destino, valor);
+            grafo.Arestas++;
             menu(grafo);
             break;
         case 4:
@@ -804,6 +930,27 @@ void menu (Grafo &grafo){
             cin >> destino;
             inicializaDijkstra(grafo, origem, destino);
             break;
+        case 10:
+            if(grafo.vertices.qtd <= 2)
+                cout << "É planar\n";
+            else if (TemCicloTres(grafo)){
+                if (grafo.Arestas <= ((grafo.vertices.qtd * 3) - 6))
+                    cout << "É planar\n";
+                else
+                    cout << "Não é planar\n";
+            }
+            else{
+                if(grafo.Arestas <= ((grafo.vertices.qtd * 2) - 4))
+                    cout << "É planar\n";
+                else
+                    cout << "Não é planar\n";
+            }
+            system("pause");
+            menu(grafo);
+            break;
+        case 11:
+            prim(grafo);
+            break;
     }
 }
 
@@ -811,6 +958,7 @@ int main(){
     setlocale(LC_ALL, "Portuguese");
     Grafo *grafo = new Grafo;
     inicializaVertice(grafo->vertices);
+    grafo->Arestas = 0;
     int aux;
     textbackground(LIGHTGRAY);
     system("cls");
