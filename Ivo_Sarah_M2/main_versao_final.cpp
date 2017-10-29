@@ -661,10 +661,11 @@ void preenche_Q(Grafo &grafo, string *Q){
 }
 
 int retornaValorAresta(TElementoVertice *vertice, string destino){
-    TElementoArco *Arco = vertice->dado.arcos.inicio;
+    TElementoArco *Arcos = vertice->dado.arcos.inicio;
     for(int i = 0; i < vertice->dado.arcos.qtd; i++){
-        if(Arco->dado.destino == destino)
-            return Arco->dado.valor;
+        if(Arcos->dado.destino == destino)
+            return Arcos->dado.valor;
+        Arcos = Arcos->prox;
     }
     return 0;
 }
@@ -701,10 +702,12 @@ void prim(Grafo &grafo){
                 for(int k = 0; k < countS_V; k++){
                     if(Arcos->dado.destino == S_Vertices[k]){
                         tmp = retornaValorAresta(vertice, Arcos->dado.destino);
+                        cout << tmp << " " << S_Vertices[k] << " " << Q[i] << "\n";
                         if(tmp > 0 && tmp < menor_valor){
                             menor_valor = tmp;
                             menor_destino = Q[i];
                             menor_origem = S_Vertices[k];
+                            cout << tmp << " " << menor_origem << "-" << menor_destino;
                         }
                     }
                 }
