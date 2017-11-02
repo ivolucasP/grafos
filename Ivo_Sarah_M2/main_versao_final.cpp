@@ -652,7 +652,7 @@ bool TemCicloTres(Grafo &grafo){
     return false;
 }
 
-void preenche_Q(Grafo &grafo, string *Q){
+void preenche_Q_Prim(Grafo &grafo, string *Q){
     TElementoVertice *nav = grafo.vertices.inicio;
     for(int i = 0; i < grafo.vertices.qtd; i++){
         Q[i] = nav->dado.nome;
@@ -670,7 +670,7 @@ int retornaValorAresta(TElementoVertice *vertice, string destino){
     return 0;
 }
 
-bool removeDeQ(string *Q, string dado, int qtd){
+bool removeDeQ_Prim(string *Q, string dado, int qtd){
     for (int i = 0; i < qtd; i++){
         if (Q[i] == dado){
             for(int j = i; j < qtd-1; j++){
@@ -687,9 +687,9 @@ void prim(Grafo &grafo){
     int countS = 0, countS_V = 0, countQ = grafo.vertices.qtd, menor_valor, tmp;
     TElementoVertice *vertice;
     TElementoArco *Arcos;
-    preenche_Q(grafo, Q);
+    preenche_Q_Prim(grafo, Q);
     vertice_inicial = Q[0];
-    if(removeDeQ(Q, vertice_inicial, countQ))
+    if(removeDeQ_Prim(Q, vertice_inicial, countQ))
         countQ--;
     S_Vertices[countS_V] = vertice_inicial;
     countS_V++;
@@ -716,7 +716,7 @@ void prim(Grafo &grafo){
         countS++;
         S_Vertices[countS_V] = menor_destino;
         countS_V++;
-        if(removeDeQ(Q, menor_destino, countQ))
+        if(removeDeQ_Prim(Q, menor_destino, countQ))
             countQ--;
     }
     for(int i = 0; i < countS; i++){
@@ -767,6 +767,121 @@ void criaMatrizDesenho(Grafo g){
 
 }
 
+void preenche_Q_Kruskal(Grafo &grafo, TListaArco &Q){
+    TElementoArco *novo;
+    TElementoVertice *vertice = grafo.vertices.inicio;
+    TElementoArco *arco;
+    TElementoArco *navQ;
+    bool flag;
+
+    for(int i = 0; i < grafo.vertices.qtd; i++){
+        arco = vertice->dado.arcos.inicio;
+        for(int j = 0; j < vertice->dado.arcos.qtd; j++){
+            navQ = Q.inicio;
+            flag = true;
+            for(int k = 0; k < Q.qtd; k++){
+                if((navQ->dado.destino == arco->dado.origem)&&(navQ->dado.origem == arco->dado.destino))
+                    flag = false;
+                navQ = navQ->prox;
+            }
+            if (flag){
+                novo = new TElementoArco;
+                novo->dado.origem = arco->dado.origem;
+                novo->dado.destino = arco->dado.destino;
+                novo->dado.valor = arco->dado.valor;
+                novo->prox = NULL;
+                novo->anterior = Q.fim;
+                if(Q.qtd == 0)
+                    Q.inicio = novo;
+                else
+                    Q.fim->prox = novo;
+                Q.fim = novo;
+                Q.qtd++;
+                bubbleSortValor(Q);
+            }
+            arco = arco->prox;
+        }
+        vertice = vertice->prox;
+    }
+}
+
+void removeDeQ_Kruskal(TListaArco &Q){
+    TElementoArco *save = new TElementoArco;
+    save = Q.inicio;
+    Q.inicio = Q.inicio->prox;
+    Q.qtd--;
+    if(Q.qtd == 0)
+        Q.fim = NULL;
+    delete save;
+}
+
+void kruskal(Grafo &grafo){
+    int qtd = grafo.vertices.qtd, x_origem, x_destino, countDestino, countS = 0;
+    string F[qtd][qtd], S[grafo.Arestas], origem, destino;
+    TListaArco Q;
+    TElementoVertice *vertice = grafo.vertices.inicio;
+    TElementoArco *navQ;
+
+    inicializaArco(Q);
+    preenche_Q_Kruskal(grafo, Q);
+    navQ = Q.inicio;
+
+    for(int i = 0; i < qtd; i++){
+        for(int j = 0; j < qtd; j++){
+            if(j == 0){
+                F[i][j] = vertice->dado.nome;
+                vertice = vertice->prox;
+            }
+            else
+                F[i][j] = "vázio";
+        }
+    }
+
+    while(Q.qtd > 0){
+        origem = Q.inicio->dado.origem;
+        destino = Q.inicio->dado.destino;
+        removeDeQ_Kruskal(Q);
+        for(int i = 0; i < qtd; i++){
+            for(int j = 0; j < qtd; j++){
+                if(F[i][j] == origem){
+                    x_origem = i;
+                }
+                if(F[i][j] == destino){
+                    x_destino = i;
+                }
+            }
+        }
+
+        if(x_origem != x_destino){
+            countDestino = 0;
+            S[countS] = origem + "-" + destino;
+            countS++;
+            for(int i = 0; i < qtd; i++){
+                if(F[x_origem][i] == "vázio"){
+                    if(F[x_destino][countDestino] != "vázio"){
+                        F[x_origem][i] = F[x_destino][countDestino];
+                        F[x_destino][countDestino] = "vázio";
+                        countDestino++;
+                    }
+                }
+            }
+        }
+    }
+
+    cout << "F: ";
+    for(int i = 0; i < qtd; i++){
+        for(int j = 0; j < qtd; j++){
+            cout << F[i][j] << ", ";
+        }
+        cout << "\n";
+    }
+    cout << "\nS: ";
+    for(int i = 0; i < countS; i++)
+        cout << S[i] << ", ";
+    system("pause");
+    menu(grafo);
+}
+
 void menu (Grafo &grafo){
     string origem, destino;
     int opcao = 0, valor;
@@ -794,6 +909,7 @@ void menu (Grafo &grafo){
          << "9.\tDijkstra\n"
          << "10.\tPlanaridade\n"
          << "11.\tPrim\n"
+         << "12.\tKruskal\n"
          << "0.\tSair\n";
     cin >> opcao;
     cin.ignore();
@@ -974,6 +1090,9 @@ void menu (Grafo &grafo){
             break;
         case 11:
             prim(grafo);
+            break;
+        case 12:
+            kruskal(grafo);
             break;
     }
 }
