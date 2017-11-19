@@ -1,0 +1,386 @@
+void criaMatrizDesenho(Grafo g){
+    int l, c;
+
+    if(g.vertices.qtd%2==0){
+        l = g.vertices.qtd + 3;
+        c = g.vertices.qtd + 1;
+    }else{
+        l = g.vertices.qtd + 2;
+        c = g.vertices.qtd + 2;
+    }
+
+    string m[l][c];
+
+    for (int i=0; i<l; i++){
+        for(int j=0; j<c; j++){
+            m[i][j] = '0';
+        }
+    }
+
+    int med = (c/2);
+
+    if(g.vertices.qtd%2==0){
+        TElementoVertice *nav = g.vertices.inicio;
+        for (int i=0; i<l; i++){
+            for(int j=0; j<c; j++){
+               if(i%2==1){
+                    if (nav == g.vertices.inicio || nav == g.vertices.fim){
+                        if(j == med){
+                            m[i][j] = nav->dado.nome;
+                            nav->dado.i = i;
+                            nav->dado.j = j;
+                            nav = nav->prox;
+                            i++;
+                            j = 0;
+                        }
+                    } else {
+                        if (j==0 || j == c-1){
+                            m[i][j] = nav->dado.nome;
+                            nav->dado.i = i;
+                            nav->dado.j = j;
+                            nav = nav->prox;
+                        }
+                    }
+               }
+            }
+        }
+    } else{
+        TElementoVertice *nav = g.vertices.inicio;
+        for (int i=0; i<l; i++){
+            for(int j=0; j<c; j++){
+               if(i%2==1){
+                    if (nav == g.vertices.inicio){
+                        if(j == med){
+                            m[i][j] = nav->dado.nome;
+                            nav = nav->prox;
+                            nav->dado.i = i;
+                            nav->dado.j = j;
+                            i++;
+                            j = 0;
+                        }
+                    } else {
+                        if (j==0 || j == c-1){
+                            m[i][j] = nav->dado.nome;
+                            nav->dado.i = i;
+                            nav->dado.j = j;
+                            nav = nav->prox;
+                        }
+                    }
+               }
+            }
+        }
+    }
+
+    TElementoVertice *nav = g.vertices.inicio;
+    while (nav){
+        TElementoArco *navArco = nav->dado.arcos.inicio;
+
+        while(navArco){
+
+            TElementoVertice *aux = g.vertices.inicio;
+            while(aux){
+                if(aux->dado.nome==navArco->dado.destino){
+                    break;
+                }
+                aux = aux->prox;
+            }
+
+            cout << nav->dado.i << endl;
+            cout << aux->dado.i << endl;
+            cout << nav->dado.j << endl;
+            cout << aux->dado.j << endl;
+
+            system("pause");
+
+            if(nav->dado.i + 2 == aux->dado.i && nav->dado.j == aux->dado.j){
+               m[nav->dado.i+1][nav->dado.j] = '|';
+            } else if (nav->dado.i == aux->dado.i){
+                for (int j = nav->dado.j+1; j<aux->dado.j; j++){
+                    m[nav->dado.i][j] = '-';
+                }
+            }
+
+//            else if (nav->dado.i == aux->dado.i - 3 && nav->dado.j == aux->dado.j+3){
+//                //int i=aux->dado.i - 1, j= nav->dado.j == aux->dado.j+1;
+//                system("pause");
+//               // m[i][j] = '/';
+//
+//            }else if (nav->dado.i == aux->dado.i - 3 && nav->dado.j == aux->dado.j-3){
+//               // int i=aux->dado.i - 1, j= nav->dado.j == aux->dado.j-1;
+//                  system("pause");
+//                 //m[i][j] = '\\';
+//
+//            }
+
+            else if (aux->dado.i > nav->dado.i && aux->dado.j > nav->dado.j){
+                int i=nav->dado.i, j=nav->dado.j;
+
+                while(i!=aux->dado.i){
+                    i++;
+                    j++;
+                    m[i][j] = '\\';
+                }
+
+                while (j!=aux->dado.j){
+                    j++;
+                    if(j!=aux->dado.j){
+                        m[i][j] = '-';
+                    }
+                }
+
+
+            } else if (aux->dado.i < nav->dado.i && aux->dado.j > nav->dado.j){
+                int i=nav->dado.i, j=nav->dado.j;
+
+                while(i!=aux->dado.i){
+                    i--;
+                    j++;
+                    if(i!=aux->dado.i){
+                        m[i][j] = '/';
+                    } else {
+                        m[i][j] = 'c';
+                    }
+                }
+
+                while (j!=aux->dado.j){
+                    j++;
+                    if(j!=aux->dado.j){
+                        m[i][j] = '-';
+                    }
+                }
+
+            }
+
+            navArco = navArco->prox;
+
+        }
+
+        nav = nav->prox;
+    }
+
+
+    for (int i=0; i<l; i++){
+        for(int j=0; j<c; j++){
+            cout << m[i][j] << "\t";
+        }
+
+        cout << endl;
+    }
+
+
+}
+
+void menu (Grafo &grafo){
+    string origem, destino;
+    int opcao = 0, valor;
+    TElementoVertice *nav;
+    TElementoArco *navnav;
+
+    textcolor(BLACK);
+
+    system("cls");
+
+    cout << "1.\tInsere Vértice\n"
+         << "2.\tRemover Vértice\n";
+    if (!grafo.isOrientado){
+        cout << "3.\tInserir Aresta\n"
+             << "4.\tRemover Aresta\n";
+    }
+    else{
+        cout << "3.\tInserir Arco\n"
+             << "4.\tRemover Arco\n";
+    }
+    cout << "5.\tRetornar Vértice\n"
+         << "6.\tExiste Aresta\n"
+         << "7.\tRetornar Arestas\n"
+         << "8.\tImprimir Grafo\n"
+         << "9.\tDijkstra\n"
+         << "10.\tPlanaridade\n"
+         << "11.\tPrim\n"
+         << "12.\tDesenha Grafo\n"
+         << "0.\tSair\n";
+    cin >> opcao;
+    cin.ignore();
+    system("cls");
+    switch (opcao){
+        case 1:
+            insereVertice(grafo);
+            break;
+        case 2:
+            cout << "Informe o vértice que deseja remover\n";
+            getline(cin, origem);
+            removeVertice(grafo, origem);
+            menu(grafo);
+            break;
+        case 3:
+            cout << "Informe o nome do vértice de origem\n";
+            getline(cin, origem);
+            cout << "Informe o nome do vértice de destino\n";
+            getline(cin, destino);
+            if(grafo.isPonderado){
+                cout << "Informe o peso do arco\n";
+                cin >> valor;
+                cin.ignore();
+            }else
+                valor = 1;
+            if (!grafo.isOrientado)
+                insereAresta(grafo, destino, origem, valor);
+            insereAresta(grafo, origem, destino, valor);
+            grafo.Arestas++;
+            menu(grafo);
+            break;
+        case 4:
+            cout << "Informe o nome do vértice de origem\n";
+            getline(cin, origem);
+            cout << "Informe o nome do vértice de destino\n";
+            getline(cin, destino);
+            if(!grafo.isOrientado)
+                removeAresta(grafo, destino, origem);
+            removeAresta(grafo, origem, destino);
+            menu(grafo);
+            break;
+        case 5:
+            cout << "Informe o nome do vértice de origem\n";
+            getline(cin, origem);
+            nav = retornaVertice(grafo, origem);
+            if (nav == NULL){
+                cout << "Vértice não encontrado\n";
+                system("pause");
+                menu(grafo);
+            }
+            cout << nav->dado.nome;
+            if (nav->dado.arcos.qtd > 0){
+                navnav = nav->dado.arcos.inicio;
+                for (int i = 0; i < nav->dado.arcos.qtd; i++){
+                    cout << " | " << navnav->dado.destino << navnav->dado.valor;
+                    navnav = navnav->prox;
+                }
+                cout << "\n";
+            }
+            system("pause");
+            menu(grafo);
+            break;
+        case 6:
+            cout << "Informe o vértice de origem\n";
+            getline(cin, origem);
+            cout << "Informe o vértice de destino\n";
+            getline(cin, destino);
+            if(!existeAresta(grafo, origem, destino))
+                cout << "Não ";
+            cout << "Existe!\n";
+            system("pause");
+            menu(grafo);
+            break;
+        case 7:
+            cout << "Informe o vértice de origem\n";
+            getline(cin, origem);
+            nav = retornaVertice(grafo, origem);
+            cout << "DFS:\n";
+            if(nav != NULL){
+                DFS(grafo, nav);
+            }
+            nav = grafo.vertices.inicio;
+            for(int i = 0; i < grafo.vertices.qtd; i++){
+                if (!nav->dado.visitado){
+                    DFS(grafo, nav);
+                }
+                nav = nav->prox;
+            }
+            resetaVerticesVisitados(grafo);
+            cout << "\nBFS:\n";
+            nav = retornaVertice(grafo, origem);
+            if (nav != NULL){
+                BFS(grafo, nav);
+            }
+            nav = grafo.vertices.inicio;
+            for (int i = 0; i < grafo.vertices.qtd; i++){
+                if (!nav->dado.visitado){
+                    BFS(grafo, nav);
+                }
+                nav = nav->prox;
+            }
+            resetaVerticesVisitados(grafo);
+            cout << "\n";
+            system("Pause");
+            menu(grafo);
+            break;
+
+        case 8:
+            nav = grafo.vertices.inicio;
+            ordenaParaColorir(grafo.vertices);
+            for(int i = 0; i < grafo.vertices.qtd; i++){
+                colore(grafo, nav->dado.nome);
+                nav = nav->prox;
+            }
+            bubbleSortNomeVertice(grafo.vertices);
+            nav = grafo.vertices.inicio;
+            for (int i = 0; i < grafo.vertices.qtd; i++){
+                if(nav->dado.cor == "vermelho"){
+                    textcolor(RED);
+                    cout << nav->dado.nome;
+                }
+                else if(nav->dado.cor == "verde"){
+                    textcolor(GREEN);
+                    cout << nav->dado.nome;
+                }
+                else if(nav->dado.cor == "amarelo"){
+                    textcolor(YELLOW);
+                    cout << nav->dado.nome;
+                }
+                else if(nav->dado.cor == "azul"){
+                    textcolor(BLUE);
+                    cout << nav->dado.nome;
+                }
+                else if(nav->dado.cor == "magenta"){
+                    textcolor(MAGENTA);
+                    cout << nav->dado.nome;
+                }
+                textcolor(BLACK);
+                navnav = nav->dado.arcos.inicio;
+                for (int j = 0; j < nav->dado.arcos.qtd; j++){
+                    cout << " | " << navnav->dado.destino << navnav->dado.valor;
+                    navnav = navnav->prox;
+                }
+                cout << "\n";
+                nav = nav->prox;
+            }
+            cout << "\n";
+            imprimeMatriz(grafo);
+            system("pause");
+            menu(grafo);
+            break;
+
+        case 9:
+            system("cls");
+            cout << endl << "Origem: " << endl;
+            cin >> origem;
+            cout << endl << "Destino: " << endl;
+            cin >> destino;
+            inicializaDijkstra(grafo, origem, destino);
+            break;
+        case 10:
+            if(grafo.vertices.qtd <= 2)
+                cout << "É planar\n";
+            else if (TemCicloTres(grafo)){
+                if (grafo.Arestas <= ((grafo.vertices.qtd * 3) - 6))
+                    cout << "É planar\n";
+                else
+                    cout << "Não é planar\n";
+            }
+            else{
+                if(grafo.Arestas <= ((grafo.vertices.qtd * 2) - 4))
+                    cout << "É planar\n";
+                else
+                    cout << "Não é planar\n";
+            }
+            system("pause");
+            menu(grafo);
+            break;
+        case 11:
+            prim(grafo);
+            break;
+        case 12:
+            criaMatrizDesenho(grafo);
+            break;
+    }
+}
