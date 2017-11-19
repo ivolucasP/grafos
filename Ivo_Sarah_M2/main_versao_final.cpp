@@ -882,6 +882,68 @@ void kruskal(Grafo &grafo){
     menu(grafo);
 }
 
+void insereVertice(Grafo &grafo, string nome){
+    TElementoVertice *novo = new TElementoVertice;
+    if (novo == NULL)
+        menu(grafo);
+    novo->dado.nome = nome;
+    inicializaArco(novo->dado.arcos);
+    novo->prox = NULL;
+    novo->ante = grafo.vertices.fim;
+    novo->dado.visitado = false;
+    novo->dado.grau = 0;
+    novo->dado.cor = "null";
+    if(grafo.vertices.qtd == 0)
+        grafo.vertices.inicio = novo;
+    else
+        grafo.vertices.fim->prox = novo;
+    grafo.vertices.fim = novo;
+    grafo.vertices.qtd++;
+    bubbleSortNomeVertice(grafo.vertices);
+}
+
+void preencheGrafoResidual(Grafo &grafo, Grafo &grafoResidual){
+    TElementoVertice *nav = grafo.vertices.inicio;
+    TElementoArco *navArco;
+    for(int i = 0; i < grafo.vertices.qtd; i++){
+        insereVertice(grafoResidual, nav->dado.nome);
+        nav = nav->prox;
+    }
+    nav = grafo.vertices.inicio;
+    for(int i = 0; i < grafo.vertices.qtd; i++){
+        navArco = nav->dado.arcos.inicio;
+        for(int j = 0; j < nav->dado.arcos.qtd; j++){
+            insereAresta(grafoResidual, navArco->dado.origem, navArco->dado.destino, navArco->dado.valor);
+            navArco = navArco->prox;
+        }
+        nav = nav->prox;
+    }
+}
+
+void DFS_ida_e_volta(Grafo &grafo, TElementoVertice* origem, string destino, int &menor_valor, bool &achou){
+
+}
+
+void FluxoMaximo(Grafo &grafo, string fonte, string sorvedor){
+    int S = 0, menor_valor = INFINITO;
+    bool achou = true;
+    TElementoVertice *nav;
+    Grafo *grafoResidual = new Grafo;
+
+    grafoResidual->isOrientado = grafo.isOrientado;
+    grafoResidual->isPonderado = grafo.isPonderado;
+
+    inicializaVertice(grafoResidual->vertices);
+    preencheGrafoResidual(grafo, *grafoResidual);
+
+    nav = retornaVertice(*grafoResidual, fonte);
+
+    while(achou){
+        achou = false;
+        DFS_ida_e_volta(*grafoResidual, nav, sorvedor, menor_valor, achou);
+    }
+}
+
 void menu (Grafo &grafo){
     string origem, destino;
     int opcao = 0, valor;
@@ -910,6 +972,7 @@ void menu (Grafo &grafo){
          << "10.\tPlanaridade\n"
          << "11.\tPrim\n"
          << "12.\tKruskal\n"
+         << "13.\tFluxo Máximo\n"
          << "0.\tSair\n";
     cin >> opcao;
     cin.ignore();
@@ -1075,13 +1138,13 @@ void menu (Grafo &grafo){
                 cout << "É planar\n";
             else if (TemCicloTres(grafo)){
                 if (grafo.Arestas <= ((grafo.vertices.qtd * 3) - 6))
-                    cout << "É planar\n";
+                    cout << "Pode ser planar\n";
                 else
                     cout << "Não é planar\n";
             }
             else{
                 if(grafo.Arestas <= ((grafo.vertices.qtd * 2) - 4))
-                    cout << "É planar\n";
+                    cout << "Pode ser planar\n";
                 else
                     cout << "Não é planar\n";
             }
@@ -1093,6 +1156,14 @@ void menu (Grafo &grafo){
             break;
         case 12:
             kruskal(grafo);
+            break;
+        case 13:
+            system("cls");
+            cout << endl << "Fonte: " << endl;
+            cin >> origem;
+            cout << endl << "Sorvedouro: " << endl;
+            cin >> destino;
+            FluxoMaximo(grafo, origem, destino);
             break;
     }
 }
