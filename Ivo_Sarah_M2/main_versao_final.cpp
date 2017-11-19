@@ -921,7 +921,45 @@ void preencheGrafoResidual(Grafo &grafo, Grafo &grafoResidual){
 }
 
 void DFS_ida_e_volta(Grafo &grafo, TElementoVertice* origem, string destino, int &menor_valor, bool &achou){
-
+    TElementoArco *navnav = origem->dado.arcos.inicio;
+    TElementoArco *navAux;
+    TElementoVertice *nav;
+    int menor_valor_anterior = menor_valor;
+    origem->dado.visitado = true;
+    if(navnav != NULL){
+        for(int i = 0; i < origem->dado.arcos.qtd && !achou; i++){
+            nav = retornaVertice(grafo, navnav->dado.destino);
+            if(menor_valor > navnav->dado.valor)
+                menor_valor = navnav->dado.valor;
+            if(nav->dado.nome != destino && !nav->dado.visitado){
+                DFS_ida_e_volta(grafo, nav, destino, menor_valor, achou);
+            }
+            if(nav->dado.nome == destino)
+                achou = true;
+            if(!achou){
+                menor_valor = menor_valor_anterior;
+                navnav = navnav->prox;
+            }
+            if(achou){
+                if(existeAresta(grafo, navnav->dado.destino, navnav->dado.origem)){
+                    navAux = nav->dado.arcos.inicio;
+                    for(int j = 0; j < nav->dado.arcos.qtd; j++){
+                        if(navAux->dado.destino == navnav->dado.origem){
+                            navAux->dado.valor += menor_valor;
+                        }
+                    }
+                }else{
+                    insereAresta(grafo, navnav->dado.destino, navnav->dado.origem, menor_valor);
+                }
+                navnav->dado.valor -= menor_valor;
+                menor_valor_anterior = menor_valor;
+                if(navnav->dado.valor == 0)
+                    removeAresta(grafo, navnav->dado.origem, navnav->dado.destino);
+                break;
+            }
+        }
+    }
+    menor_valor = menor_valor_anterior;
 }
 
 void FluxoMaximo(Grafo &grafo, string fonte, string sorvedor){
@@ -940,8 +978,12 @@ void FluxoMaximo(Grafo &grafo, string fonte, string sorvedor){
 
     while(achou){
         achou = false;
+        resetaVerticesVisitados(*grafoResidual);
         DFS_ida_e_volta(*grafoResidual, nav, sorvedor, menor_valor, achou);
+        if(achou)
+            S += menor_valor;
     }
+    cout << "S: " << S;
 }
 
 void menu (Grafo &grafo){
