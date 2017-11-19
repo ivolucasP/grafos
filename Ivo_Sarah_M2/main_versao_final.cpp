@@ -983,7 +983,10 @@ void FluxoMaximo(Grafo &grafo, string fonte, string sorvedor){
         if(achou)
             S += menor_valor;
     }
+    system("cls");
     cout << "S: " << S;
+    system("pause");
+    menu(grafo);
 }
 
 void menu (Grafo &grafo){
